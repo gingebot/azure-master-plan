@@ -43,7 +43,7 @@ jobs:
         continue-on-error: true
 
       - uses: actions/github-script@0.9.0
-        if: github.event_name == 'pull_request'
+        if: 
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
@@ -58,17 +58,32 @@ jobs:
             ${process.env.PLAN}
             \`\`\`\n
             </details>
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output
             })
+      - name: Terraform Build QA Branch
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        run:  terraform apply -auto-approve -var "env=${{ steps.extract_branch.outputs.branch }}
+
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
+      - name: Terraform Output
+        id: output
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        run: terraform output -no-color
+        continue-on-error: true
+
+      - name: Destroy preview environment
+        if: github.event.action == 'closed'
+        id: destroy-preview-environment
+        run: terraform destroy -auto-approve
+
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -var "env=${{ steps.extract_branch.outputs.branch }}"
+        run: terraform apply -auto-approve -var "env=PROD"
