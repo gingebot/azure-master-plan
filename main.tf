@@ -12,6 +12,6 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "main" {
-  name     = "gingebotics"
+  name     = "gingebotics-${vars.env}"
   location = "UK South"
 }
