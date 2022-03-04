@@ -13,10 +13,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
@@ -69,4 +71,4 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -var "env=${{ steps.extract_branch.outputs.branch }}"
