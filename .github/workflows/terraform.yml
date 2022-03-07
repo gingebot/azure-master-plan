@@ -67,7 +67,7 @@ jobs:
             })
       - name: Terraform Build QA Branch
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
-        run:  terraform apply -auto-approve -var "env=${{ steps.extract_branch.outputs.branch }}
+        run:  terraform apply -auto-approve -var "env=${{ steps.extract_branch.outputs.branch }}"
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
