@@ -20,7 +20,7 @@ jobs:
         id: extract_branch
 
       - name: Check branch variable
-        run: echo ${{ github.ref_name }}
+        run: echo ${{ github.head_ref }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
