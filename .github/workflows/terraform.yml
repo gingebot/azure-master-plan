@@ -19,6 +19,9 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
 
+      - name: Check branch variable
+        run: echo ${{ github.ref_name }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
@@ -66,8 +69,6 @@ jobs:
               body: output
             })
 
-      - name: Check branch variable
-        run: echo ${{ steps.extract_branch.outputs.branch }}
 
       - name: Terraform Build QA Branch
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
