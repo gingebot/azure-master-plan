@@ -14,11 +14,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
       - name: Check branch variable
         run: echo ${{ github.head_ref }}
 
@@ -72,7 +67,7 @@ jobs:
 
       - name: Terraform Build QA Branch
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
-        run:  terraform apply -auto-approve -var "env=${{ steps.extract_branch.outputs.branch }}"
+        run:  terraform apply -auto-approve -var "env=${{ github.head_ref }}"
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
