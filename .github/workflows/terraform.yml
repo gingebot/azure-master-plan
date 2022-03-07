@@ -7,15 +7,12 @@ on:
   pull_request:
 
 jobs:
-  terraform:
-    name: 'Terraform'
+  StaticTests:
+    name: 'Static Tests'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Check branch variable
-        run: echo ${{ github.head_ref }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
@@ -64,15 +61,30 @@ jobs:
               body: output
             })
 
-
-      - name: Terraform Build QA Branch
-        if: github.event_name == 'pull_request' && github.event.action != 'closed'
-        run:  terraform apply -auto-approve -var "env=${{ github.head_ref }}"
-
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
+  BuildQA:
+    name: 'Build QA Environment'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Build QA Branch
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        run:  terraform apply -auto-approve -var "env=${{ github.head_ref }}"
+        
       - name: Terraform Output
         id: output
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
