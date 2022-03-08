@@ -6,11 +6,6 @@ on:
       - main
   pull_request:
 
-env:
-  ARM_CLIENT_ID: "${{ secrets.ARM_CLIENT_ID }}"
-  ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}"
-  ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}"
-
 jobs:
   StaticTests:
     name: 'Static Tests'
@@ -111,7 +106,7 @@ jobs:
 
       - name: Terraform Build QA Branch
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
-        run: terraform apply -auto-approve -var "env=${{ github.head_ref }}"
+        run: terraform apply -auto-approve -var "env=${{ github.head_ref }}" -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}"
         
       - name: Terraform Output
         id: output
