@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+env:
+  workspace:  "azure-master-plan-BRANCH-${{ github.head_ref }}"
+
 jobs:
   StaticTests:
     name: 'Static Tests'
@@ -96,7 +99,7 @@ jobs:
 
       - name: Create TF Workspace
         run: |
-          terraform workspace select azure-master-plan-${{ github.head_ref }} || terraform workspace new azure-master-plan-${{ github.head_ref }} 
+          terraform workspace select ${{ env.workspace }} || terraform workspace new ${{ env.workspace }} 
 
       - name: Terraform Build QA Branch
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
