@@ -67,6 +67,7 @@ jobs:
 
   BuildQA:
     name: 'Build QA Environment'
+    needs: StaticTests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
