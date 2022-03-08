@@ -125,7 +125,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = ## QA Environment Build\
+            const output = `## QA Environment Build\
             #### QA Environment Azure Resource Group: ${{ steps.output_az_rg.outputs.stdout }}
             #### QA Environment Azure Resource Location: ${{ steps.output_az_location.outputs.stdout }}
             #### QA Environemnt Terraform Workspace: ${{ env.workspace }}
