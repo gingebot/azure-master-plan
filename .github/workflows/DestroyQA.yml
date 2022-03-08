@@ -6,7 +6,6 @@ on:
 jobs:
   DestroyQA:
     name: 'Destroy QA Environment'
-    needs: StaticTests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
