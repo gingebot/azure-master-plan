@@ -11,7 +11,6 @@ env:
   ARM_CLIENT_SECRET: "${{ secrets.ARM_CLIENT_SECRET }}"
   ARM_SUBSCRIPTION_ID: "${{ secrets.ARM_SUBSCRIPTION_ID }}"
   ARM_TENANT_ID: "${{ secrets.ARM_TENANT_ID }}"
-  TF_WORKSPACE: "azure-master-plan-DEV"
 
 jobs:
   StaticTests:
@@ -30,8 +29,12 @@ jobs:
         id: fmt
         run: terraform fmt -check
 
-      - name: check env
-        run: env 
+      - name: set default workspace
+        run: |
+          rm -rf .terraform
+          mkdir .terraform
+          printf '%s' azure-master-plan-DEV > .terraform/environment
+
       - name: Terraform Init
         id: init
         run: terraform init
@@ -86,10 +89,13 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-
-      - name: Set default TF workspace for init
-        run: export TF_WORKSPACE="azure-master-plan-DEV"
         
+      - name: set default workspace
+        run: |
+          rm -rf .terraform
+          mkdir .terraform
+          printf '%s' azure-master-plan-DEV > .terraform/environment
+
       - name: Terraform Init
         id: init
         run: terraform init
