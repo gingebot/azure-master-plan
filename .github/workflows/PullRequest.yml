@@ -1,11 +1,9 @@
-name: "Pull Request Workflow"
+---
+name: "Open Pull Request Workflow"
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-
+    types: [opened, reopened]
 env:
   workspace:  "azure-master-plan-BRANCH-${{ github.head_ref }}"
 
@@ -54,7 +52,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `## Static Test Results :\
+            const output = `## Static Test Results :
             #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
@@ -125,7 +123,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `## QA Environment Build\
+            const output = `## QA Environment Build
             #### QA Environment Azure Resource Group: ${{ steps.output_az_rg.outputs.stdout }}
             #### QA Environment Azure Resource Location: ${{ steps.output_az_location.outputs.stdout }}
             #### QA Environemnt Terraform Workspace: ${{ env.workspace }}
@@ -141,12 +139,3 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
-
-      - name: Destroy preview environment
-        if: github.event.action == 'closed'
-        id: destroy-preview-environment
-        run: terraform destroy -auto-approve
-
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -var "env=PROD"
