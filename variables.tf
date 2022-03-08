@@ -2,10 +2,6 @@ variable "env" {
   type    = string
   default = "DEV"
 }
-variable "meh" {
-  type    = string
-  default = "DEVa"
-}
 
 variable "client_id" {
   type = string

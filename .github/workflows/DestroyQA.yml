@@ -38,4 +38,4 @@ jobs:
         continue-on-error: true
       
       - name: Delete TF Workspace
-        run: terraform workspace select ${{ env.workspace }}
+        run: terraform workspace delete ${{ env.workspace }}
