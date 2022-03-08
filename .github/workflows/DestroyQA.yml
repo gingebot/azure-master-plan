@@ -34,7 +34,7 @@ jobs:
       - name: Destroy preview environment
         if: github.event.action == 'closed'
         id: destroy-preview-environment
-        run: terraform destroy -auto-approve  -var "env=${{ github.head_ref }}" -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}"
+        run: terraform destroy -auto-approve  -var "env=BRANCH-${{ github.head_ref }}" -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}"
         continue-on-error: true
       
       - name: Delete TF Workspace
