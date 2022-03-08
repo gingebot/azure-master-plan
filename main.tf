@@ -2,7 +2,7 @@ terraform {
   cloud {
     organization = "gingebotics"
     workspaces {
-      name = "azure-master-plan-DEV"
+      tags = ["app:azure-master-plan"]
     }
   }
 }
