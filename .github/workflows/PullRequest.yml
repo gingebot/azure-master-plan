@@ -85,6 +85,9 @@ jobs:
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
+      - name: Set default TF workspace for init
+        run: export TF_WORKSPACE="azure-master-plan-DEV"
+        
       - name: Terraform Init
         id: init
         run: terraform init
@@ -92,7 +95,7 @@ jobs:
       - name: Create TF Workspace
         run: |
           terraform workspace select azure-master-plan-${{ github.head_ref }} || terraform workspace new azure-master-plan-${{ github.head_ref }} 
-          
+
       - name: Terraform Build QA Branch
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
         run: terraform apply -auto-approve -var "env=${{ github.head_ref }}"
