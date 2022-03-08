@@ -1,0 +1,42 @@
+---
+name: "Push To Main Workflow"
+
+on:
+  push:
+    branches:
+      - main
+env:
+  workspace:  azure-master-plan-DEV
+  default_workspace: azure-master-plan-DEV
+
+jobs:
+  BuildDevEnv:
+    name: "Build Dev Environment"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+        
+      - name: set default workspace
+        run: |
+          rm -rf .terraform
+          mkdir .terraform
+          printf '%s' azure-master-plan-DEV > .terraform/environment
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Create TF Workspace
+        run: |
+          terraform workspace select ${{ env.workspace }} || terraform workspace new ${{ env.workspace }} 
+
+      - name: Terraform Build QA Branch
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        id: build
+        run: terraform apply -auto-approve -var "env=BRANCH-${{ github.head_ref }}" -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}"
