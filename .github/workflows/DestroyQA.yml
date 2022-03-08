@@ -1,4 +1,4 @@
- name: "Close PR"
+name: "Close PR"
 
 on:
   pull_request:
