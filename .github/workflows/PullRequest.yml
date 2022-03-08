@@ -6,6 +6,13 @@ on:
       - main
   pull_request:
 
+env:
+  ARM_CLIENT_ID="${{ secrets.ARM_CLIENT_ID }}"
+  ARM_CLIENT_SECRET="${{ secrets.ARM_CLIENT_SECRET }}"
+  ARM_SUBSCRIPTION_ID="${{ secrets.ARM_SUBSCRIPTION_ID }}"
+  ARM_TENANT_ID="${{ secrets.ARM_TENANT_ID }}"
+  TF_WORKSPACE="azure-master-plan-DEV"
+
 jobs:
   StaticTests:
     name: 'Static Tests'
@@ -22,9 +29,6 @@ jobs:
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
-
-      - name: Set default TF workspace for init
-        run: export TF_WORKSPACE="azure-master-plan-DEV"
 
       - name: check env
         run: env 
@@ -77,13 +81,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: set TF Azure Variables
-        run: |
-          export ARM_CLIENT_ID="${{ secrets.ARM_CLIENT_ID }}"
-          export ARM_CLIENT_SECRET="${{ secrets.ARM_CLIENT_SECRET }}"
-          export ARM_SUBSCRIPTION_ID="${{ secrets.ARM_SUBSCRIPTION_ID }}"
-          export ARM_TENANT_ID="${{ secrets.ARM_TENANT_ID }}"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
