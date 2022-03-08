@@ -3,7 +3,7 @@ variable "env" {
   default = "DEV"
 }
 
-variable "env" {
+variable "blahg" {
   type    = string
   default = "DEVa"
 }
