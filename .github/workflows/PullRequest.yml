@@ -23,6 +23,9 @@ jobs:
         id: fmt
         run: terraform fmt -check
 
+      - name: Set default TF workspace for init
+        run: export TF_WORKSPACE="azure-master-plan-DEV"
+        
       - name: Terraform Init
         id: init
         run: terraform init
