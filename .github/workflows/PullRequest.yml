@@ -26,7 +26,7 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init
-      
+ 
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
@@ -38,7 +38,7 @@ jobs:
         continue-on-error: true
 
       - uses: actions/github-script@0.9.0
-        if: 
+        if:
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
@@ -73,18 +73,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: set TF Azure Variables
+        run: |
+          export ARM_CLIENT_ID="${{ secrets.ARM_CLIENT_ID }}"
+          export ARM_CLIENT_SECRET="${{ secrets.ARM_CLIENT_SECRET }}"
+          export ARM_SUBSCRIPTION_ID="${{ secrets.ARM_SUBSCRIPTION_ID }}"
+          export ARM_TENANT_ID="${{ secrets.ARM_TENANT_ID }}"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
+      - name: Create TF Workspace
+        run: |
+          terraform workspace select azure-master-plan-${{ github.head_ref }} || terraform workspace new azure-master-plan-${{ github.head_ref }} 
       - name: Terraform Init
         id: init
         run: terraform init
 
       - name: Terraform Build QA Branch
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
-        run:  terraform apply -auto-approve -var "env=${{ github.head_ref }}"
+        run: terraform apply -auto-approve -var "env=${{ github.head_ref }}"
         
       - name: Terraform Output
         id: output
