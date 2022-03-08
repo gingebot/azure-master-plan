@@ -44,7 +44,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = ## QA Environment Destruction\
+            const output = `## QA Environment Destruction\
             #### Terraform Destroy Run Status: \`${{ steps.destroy-preview-environment.outcome }}\`
             <details><summary>Show Destroy run</summary>
             \n\`\`\`\n
