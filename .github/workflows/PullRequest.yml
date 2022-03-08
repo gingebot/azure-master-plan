@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+env:
+  workspace:  "azure-master-plan-BRANCH-${{ github.head_ref }}"
+
 jobs:
   StaticTests:
     name: 'Static Tests'
@@ -23,10 +26,16 @@ jobs:
         id: fmt
         run: terraform fmt -check
 
+      - name: set default workspace
+        run: |
+          rm -rf .terraform
+          mkdir .terraform
+          printf '%s' azure-master-plan-DEV > .terraform/environment
+
       - name: Terraform Init
         id: init
         run: terraform init
-      
+ 
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
@@ -34,17 +43,19 @@ jobs:
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
-        run: terraform plan -no-color
+        run: terraform plan -no-color -var "env=BRANCH-${{ github.head_ref }}" -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}"
         continue-on-error: true
 
-      - uses: actions/github-script@0.9.0
-        if: 
+      - name: Comment Test Results On PR
+        uses: actions/github-script@0.9.0
+        if:
         env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+          PLAN: "${{ steps.plan.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            const output = `## Static Test Results :\`
+            #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
             #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
@@ -77,20 +88,59 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+        
+      - name: set default workspace
+        run: |
+          rm -rf .terraform
+          mkdir .terraform
+          printf '%s' azure-master-plan-DEV > .terraform/environment
 
       - name: Terraform Init
         id: init
         run: terraform init
 
+      - name: Create TF Workspace
+        run: |
+          terraform workspace select ${{ env.workspace }} || terraform workspace new ${{ env.workspace }} 
+
       - name: Terraform Build QA Branch
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
-        run:  terraform apply -auto-approve -var "env=${{ github.head_ref }}"
+        id: build
+        run: terraform apply -auto-approve -var "env=BRANCH-${{ github.head_ref }}" -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}"
         
-      - name: Terraform Output
-        id: output
-        if: github.event_name == 'pull_request' && github.event.action != 'closed'
-        run: terraform output -no-color
+      - name: Terraform Output AZ RG
+        id: output_az_rg
+        run: terraform output -no-color resource_group_name
         continue-on-error: true
+
+      - name: Terraform Output AZ RG
+        id: output_az_location
+        run: terraform output -no-color resource_group_location
+        continue-on-error: true
+
+      - name: Comment QA Build on PR
+        uses: actions/github-script@0.9.0
+        env:
+          BUILD: "${{ steps.build.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `## QA Environment Build\`
+            #### QA Environment Azure Resource Group: ${{ steps.output_az_rg.outputs.stdout }}
+            #### QA Environment Azure Resource Location: ${{ steps.output_az_location.outputs.stdout }}
+            #### QA Environemnt Terraform Workspace: ${{ env.workspace }}
+            <details><summary>Show Build</summary>
+            \n\`\`\`\n
+            ${process.env.BUILD}
+            \`\`\`\n
+            </details>
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
 
       - name: Destroy preview environment
         if: github.event.action == 'closed'
