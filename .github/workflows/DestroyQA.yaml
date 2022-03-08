@@ -1,9 +1,6 @@
  name: "Close PR"
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     types: [ closed ]
 
