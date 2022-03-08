@@ -29,9 +29,6 @@ jobs:
           mkdir .terraform
           printf '%s' azure-master-plan-DEV > .terraform/environment
 
-      - name: check env
-        run: env | grep ARM
-
       - name: Terraform Init
         id: init
         run: terraform init
@@ -100,9 +97,6 @@ jobs:
       - name: Create TF Workspace
         run: |
           terraform workspace select azure-master-plan-${{ github.head_ref }} || terraform workspace new azure-master-plan-${{ github.head_ref }} 
-
-      - name: check env
-        run: env | grep ARM
 
       - name: Terraform Build QA Branch
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
