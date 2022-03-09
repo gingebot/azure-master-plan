@@ -37,6 +37,5 @@ jobs:
           terraform workspace select ${{ env.workspace }} || terraform workspace new ${{ env.workspace }} 
 
       - name: Terraform Build QA Branch
-        if: github.event_name == 'pull_request' && github.event.action != 'closed'
         id: build
         run: terraform apply -auto-approve -var "env=BRANCH-${{ github.head_ref }}" -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}"
