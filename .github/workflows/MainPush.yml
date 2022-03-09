@@ -38,4 +38,4 @@ jobs:
 
       - name: Terraform Build QA Branch
         id: build
-        run: terraform apply -auto-approve -var "env=BRANCH-${{ github.head_ref }}" -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}"
+        run: terraform apply -auto-approve -var "env=${{ env.workspace }}" -var "client_id=${{ secrets.ARM_CLIENT_ID }}" -var "client_secret=${{ secrets.ARM_CLIENT_SECRET }}" -var "subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var "tenant_id=${{ secrets.ARM_TENANT_ID }}"
