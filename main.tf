@@ -20,10 +20,13 @@ resource "azurerm_resource_group" "main" {
   location = "UK South"
 }
 
-output "resource_group_name" {
-  value = azurerm_resource_group.main.name
-}
 
-output "resource_group_location" {
-  value = azurerm_resource_group.main.location
+module "vnet" {
+  source = "Azure/vnet/azurerm"
+  resource_group_name = azurerm_resource_group.main.name
+  address_space       = ["10.1.0.0/16"]
+  subnet_prefixes     = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
+  subnet_names        = ["subnet1", "subnet2", "subnet3"]
+
+  depends_on = [    azurerm_resource_group.main  ]
 }
